@@ -1,5 +1,6 @@
 "use client"
 
+import React from 'react'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { ProgressRing } from '@/components/ui/progress-ring'
 import { Button } from '@/components/ui/button'
@@ -15,8 +16,22 @@ export default function Dashboard() {
   
   const dailyCalories = calculateCalories(profile.weight, profile.height, profile.age, profile.gender)
   const macros = calculateMacros(dailyCalories)
-  const consumedCalories = 1200 // Mock data
-  const calorieProgress = consumedCalories / dailyCalories
+  const [consumedCalories, setConsumedCalories] = React.useState(0);
+  React.useEffect(() => {
+    const saved = localStorage.getItem('fitboost_calories');
+    if (saved) setConsumedCalories(parseInt(saved));
+  }, []);
+  const calorieProgress = consumedCalories / dailyCalories;
+
+  const addCalories = (amount: number) => {
+    const newCalories = consumedCalories + amount;
+    setConsumedCalories(newCalories);
+    localStorage.setItem('fitboost_calories', newCalories.toString());
+  };
+  const resetCalories = () => {
+    setConsumedCalories(0);
+    localStorage.setItem('fitboost_calories', '0');
+  };
 
   const meals = [
     { name: 'Breakfast', calories: 400, time: '8:00 AM', completed: true },
@@ -53,7 +68,7 @@ export default function Dashboard() {
             <CardDescription>Track your daily calorie intake</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-center">
+            <div className="flex flex-col items-center justify-center gap-4">
               <ProgressRing value={consumedCalories} max={dailyCalories} size={140}>
                 <div className="text-center">
                   <div className="text-2xl font-bold text-primary">
@@ -64,6 +79,7 @@ export default function Dashboard() {
                   </div>
                 </div>
               </ProgressRing>
+              {/* Removed calorie input/add/reset buttons from ring */}
             </div>
           </CardContent>
         </Card>
@@ -127,7 +143,7 @@ export default function Dashboard() {
             <CardDescription>Stay hydrated throughout the day</CardDescription>
           </CardHeader>
           <CardContent>
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col items-center gap-4">
               <div className="flex items-center gap-2">
                 <Button
                   variant="outline"
@@ -154,6 +170,53 @@ export default function Dashboard() {
                   <Plus className="h-4 w-4" />
                 </Button>
               </div>
+              <div className="flex gap-3 mt-2">
+                {[...Array(waterLog.goal)].map((_, i) => {
+                  const filled = i < waterLog.glasses;
+                  return (
+                    <svg
+                      key={i}
+                      width="48"
+                      height="72"
+                      viewBox="0 0 48 72"
+                      style={{ display: 'inline-block' }}
+                    >
+                      <defs>
+                        {/* Glass gradient */}
+                        <linearGradient id={`glass-gradient-${i}`} x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#f5f8ff" />
+                          <stop offset="100%" stopColor="#cfd8e3" />
+                        </linearGradient>
+                        {/* Water gradient */}
+                        <linearGradient id={`water-gradient-${i}`} x1="0" y1="1" x2="0" y2="0">
+                          <stop offset="0%" stopColor="#3b82f6" />
+                          <stop offset="100%" stopColor="#60a5fa" />
+                        </linearGradient>
+                        {/* Shadow */}
+                        <filter id={`glass-shadow-${i}`} x="-20%" y="-20%" width="140%" height="140%">
+                          <feDropShadow dx="0" dy="2" stdDeviation="2" floodColor="#bfc9d6" floodOpacity="0.25" />
+                        </filter>
+                      </defs>
+                      {/* Glass outline with gradient and shadow */}
+                      <polygon points="8,4 40,4 36,68 12,68" fill={`url(#glass-gradient-${i})`} stroke="#bfc9d6" strokeWidth="2" filter={`url(#glass-shadow-${i})`} />
+                      {/* Water fill with gradient */}
+                      <rect
+                        x="12"
+                        y={68 - (filled ? 56 : 0)}
+                        width="24"
+                        height={filled ? 56 : 0}
+                        rx="6"
+                        fill={`url(#water-gradient-${i})`}
+                        style={{ transition: 'height 0.6s cubic-bezier(.4,2,.3,1), y 0.6s cubic-bezier(.4,2,.3,1)' }}
+                      />
+                      {/* Glass highlight */}
+                      <rect x="16" y="12" width="4" height="40" rx="2" fill="#fff" opacity="0.18" />
+                      {/* Rim highlight */}
+                      <ellipse cx="24" cy="7" rx="14" ry="3" fill="#fff" opacity="0.25" />
+                    </svg>
+                  );
+                })}
+              </div>
               <div className="w-16 h-16">
                 <ProgressRing value={waterLog.glasses} max={waterLog.goal} size={64}>
                   <Droplets className="h-6 w-6 text-primary" />
@@ -174,11 +237,10 @@ export default function Dashboard() {
           </CardHeader>
           <CardContent>
             <div className="text-center py-4">
-              <div className="text-6xl mb-4">💪</div>
               <h3 className="text-lg font-semibold mb-2">Upper Body Strength</h3>
               <p className="text-muted-foreground mb-4">45 minutes • 8 exercises</p>
               <Button asChild className="w-full">
-                <Link href="/dashboard/workout">
+                <Link href="/dashboard/workout/session">
                   Start Workout
                 </Link>
               </Button>

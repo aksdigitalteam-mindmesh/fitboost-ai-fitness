@@ -1,6 +1,6 @@
 "use client"
 
-import { cn } from "@/lib/utils"
+import { cn } from "../../src/lib/utils"
 
 interface ProgressRingProps {
   value: number
@@ -8,6 +8,7 @@ interface ProgressRingProps {
   size?: number
   strokeWidth?: number
   className?: string
+  color?: string
   children?: React.ReactNode
 }
 
@@ -17,6 +18,7 @@ export function ProgressRing({
   size = 120, 
   strokeWidth = 8, 
   className,
+  color = "#3b82f6", // default blue
   children 
 }: ProgressRingProps) {
   const radius = (size - strokeWidth) / 2
@@ -37,22 +39,21 @@ export function ProgressRing({
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="currentColor"
+          stroke="#e5e7eb"
           strokeWidth={strokeWidth}
           fill="none"
-          className="text-muted-foreground/20"
         />
         {/* Progress circle */}
         <circle
           cx={size / 2}
           cy={size / 2}
           r={radius}
-          stroke="currentColor"
+          stroke={color}
           strokeWidth={strokeWidth}
           fill="none"
           strokeDasharray={strokeDasharray}
           strokeDashoffset={strokeDashoffset}
-          className="text-primary transition-all duration-300 ease-in-out"
+          style={{ transition: "stroke-dashoffset 0.3s" }}
           strokeLinecap="round"
         />
       </svg>

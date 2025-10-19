@@ -3,7 +3,7 @@
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { Home, Activity, Brain, ChefHat, User } from 'lucide-react'
-import { cn } from '@/lib/utils'
+import { cn } from '../src/lib/utils'
 
 const navItems = [
   { href: '/dashboard', icon: Home, label: 'Home' },

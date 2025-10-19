@@ -104,7 +104,7 @@ export default function WorkoutPage() {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {currentPlan.days.map((day, dayIndex) => (
+              {(Array.isArray(currentPlan.days) ? currentPlan.days : []).map((day, dayIndex) => (
                 <div key={dayIndex} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-3">

@@ -36,6 +36,8 @@ export function usePremiumStatus() {
     if (saved) {
       setProfile(JSON.parse(saved))
     }
+    // Reset AI usage on next load for testing
+    resetAiUsage();
   }, [])
 
   const updateProfile = (updates: Partial<UserProfile>) => {

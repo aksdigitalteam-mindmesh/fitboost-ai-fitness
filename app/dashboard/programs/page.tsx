@@ -15,41 +15,38 @@ export default function ProgramsPage() {
   const [generatedPlan, setGeneratedPlan] = useState<any>(null)
 
   const generateWorkoutPlan = async () => {
-    if (!canUseAi) return
-
-    setIsGenerating(true)
-    useAiGeneration()
-
+    if (!canUseAi) return;
+    setIsGenerating(true);
+    useAiGeneration();
     try {
+      const duration = 7; // Limit to 7 days
       const response = await fetch('/api/generate-workout', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           goals: ['strength', 'muscle_gain'],
           intensity: 'intermediate',
-          duration: 7,
+          duration,
           equipment: ['bodyweight', 'dumbbells'],
           timePerSession: 45
         })
-      })
-
-      const plan = await response.json()
-      setGeneratedPlan(plan)
-      saveWorkoutPlan(plan)
+      });
+      const plan = await response.json();
+      setGeneratedPlan(plan);
+      saveWorkoutPlan(plan);
     } catch (error) {
-      console.error('Error generating workout plan:', error)
+      console.error('Error generating workout plan:', error);
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
-  }
+  } 
 
   const generateDietPlan = async () => {
-    if (!canUseAi) return
-
-    setIsGenerating(true)
-    useAiGeneration()
-
+    if (!canUseAi) return;
+    setIsGenerating(true);
+    useAiGeneration();
     try {
+      const duration = 7; // Limit to 7 days
       const response = await fetch('/api/generate-diet', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -57,16 +54,16 @@ export default function ProgramsPage() {
           goals: ['weight_loss', 'muscle_gain'],
           dietaryRestrictions: [],
           calories: 2000,
-          mealsPerDay: 4
+          mealsPerDay: 4,
+          duration
         })
-      })
-
-      const plan = await response.json()
-      setGeneratedPlan(plan)
+      });
+      const plan = await response.json();
+      setGeneratedPlan(plan);
     } catch (error) {
-      console.error('Error generating diet plan:', error)
+      console.error('Error generating diet plan:', error);
     } finally {
-      setIsGenerating(false)
+      setIsGenerating(false);
     }
   }
 
@@ -174,10 +171,8 @@ export default function ProgramsPage() {
                 </div>
                 <div>
                   <label className="text-sm font-medium">Duration (days)</label>
-                  <select className="w-full mt-1 p-2 border rounded-md bg-background">
+                  <select className="w-full mt-1 p-2 border rounded-md bg-background" disabled>
                     <option>7 days</option>
-                    <option>14 days</option>
-                    <option>30 days</option>
                   </select>
                 </div>
                 <div>
@@ -299,7 +294,7 @@ export default function ProgramsPage() {
         )}
 
         {/* Generated Plan Display */}
-        {generatedPlan && (
+        {generatedPlan && generatedPlan.planName && generatedPlan.days ? (
           <Card>
             <CardHeader>
               <CardTitle>Generated Plan</CardTitle>
@@ -308,35 +303,44 @@ export default function ProgramsPage() {
             <CardContent>
               <div className="space-y-4">
                 <h3 className="font-semibold text-lg">{generatedPlan.planName}</h3>
-                {generatedPlan.days && (
-                  <div className="space-y-2">
-                    {generatedPlan.days.map((day: any, index: number) => (
-                      <div key={index} className="border rounded-lg p-3">
-                        <h4 className="font-medium">{day.day}</h4>
-                        {day.exercises && (
-                          <div className="mt-2 space-y-1">
-                            {day.exercises.map((exercise: any, exIndex: number) => (
-                              <div key={exIndex} className="text-sm text-muted-foreground">
-                                • {exercise.name} - {exercise.sets} sets × {exercise.reps} reps
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                        {day.meals && (
-                          <div className="mt-2 space-y-1">
-                            {day.meals.map((meal: any, mealIndex: number) => (
-                              <div key={mealIndex} className="text-sm text-muted-foreground">
-                                • {meal.name} - {meal.calories} cal
-                              </div>
-                            ))}
-                          </div>
-                        )}
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <p className="text-sm text-muted-foreground">{generatedPlan.description}</p>
+                <div className="space-y-2">
+                  {generatedPlan.days.map((day: any, index: number) => (
+                    <div key={index} className="border rounded-lg p-3">
+                      <h4 className="font-medium">{day.day}</h4>
+                      {day.exercises && day.exercises.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          {day.exercises.map((exercise: any, exIndex: number) => (
+                            <div key={exIndex} className="text-sm text-muted-foreground">
+                              • {exercise.name} - {exercise.sets} sets × {exercise.reps} reps
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {day.meals && day.meals.length > 0 && (
+                        <div className="mt-2 space-y-1">
+                          {day.meals.map((meal: any, mealIndex: number) => (
+                            <div key={mealIndex} className="text-sm text-muted-foreground">
+                              • {meal.name} - {meal.calories} cal
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                      {(!day.exercises || day.exercises.length === 0) && (!day.meals || day.meals.length === 0) && (
+                        <div className="text-xs text-muted-foreground">Rest Day</div>
+                      )}
+                    </div>
+                  ))}
+                </div>
               </div>
             </CardContent>
+          </Card>
+        ) : generatedPlan && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Generated Plan</CardTitle>
+              <CardDescription>No details available. Try again or check your API response.</CardDescription>
+            </CardHeader>
           </Card>
         )}
 
