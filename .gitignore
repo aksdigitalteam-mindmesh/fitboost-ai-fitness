@@ -47,3 +47,5 @@ ios/
 
 # OS
 Thumbs.db
+
+dist/
