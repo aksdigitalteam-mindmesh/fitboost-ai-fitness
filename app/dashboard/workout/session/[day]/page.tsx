@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -8,19 +8,32 @@ import { useWorkoutLog } from "@/src/hooks/use-workout-log";
 // Mock video URL for demonstration
 const guideVideoUrl = "https://www.youtube.com/embed/dQw4w9WgXcQ";
 
-export default function WorkoutDaySessionPage({ params }: { params: { day: string } }) {
+export default function WorkoutDaySessionPage({
+  params,
+}: {
+  params: { day?: string | string[] };
+}) {
   const { workoutPlan } = useWorkoutLog();
   const plan = workoutPlan || {
     planName: "7-Day Full Body Strength Plan",
     days: [
-      { day: "Day 1 - Upper Body", exercises: [
-        { name: "Push-Ups", sets: 4, reps: 15, rest: "60s", completed: false },
-        { name: "Plank", sets: 3, reps: "45s", rest: "30s", completed: false }
-      ], completed: false },
+      {
+        day: "Day 1 - Upper Body",
+        exercises: [
+          { name: "Push-Ups", sets: 4, reps: 15, rest: "60s", completed: false },
+          { name: "Plank", sets: 3, reps: "45s", rest: "30s", completed: false },
+        ],
+        completed: false,
+      },
       // ...other days
     ],
   };
-  const dayIdx = parseInt(params.day);
+  // Safely handle route params which can be string | string[] | undefined
+  const rawDay = Array.isArray(params?.day) ? params.day[0] : params?.day;
+  let dayIdx = parseInt(String(rawDay ?? "0"), 10);
+  if (Number.isNaN(dayIdx) || dayIdx < 0 || dayIdx >= (plan.days?.length ?? 0)) {
+    dayIdx = 0;
+  }
   const exercises = plan.days[dayIdx]?.exercises || [];
   const [currentIdx, setCurrentIdx] = useState(0);
   const [showRest, setShowRest] = useState(false);
